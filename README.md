@@ -6,6 +6,12 @@ In this project, I analyze a dataset containing information about 426,880 used c
 
 In this project I follow the CRISP-DM (Cross-Industry Standard Process for Data Mining) methodology, which is a well-established framework for addressing data problems.
 
+## 🗃️ Project Organization
+
+* `notebook/used_cars.ipynb` The Jupyter notebook containing the data cleaning, analysis, and modeling steps.
+* `data/vehicles.csv` The raw dataset used for the analysis.
+* `images/` Folder containing the relevant plots and visualizations used in the analysis.
+
 ## 📊 Data
 
 The dataset used for this project contains the following features:
@@ -30,48 +36,43 @@ The dataset can be found in `data/vehicles.csv`
 
 The following steps were taken to clean and prepare the data:
 
-1. Handling Missing Values: Several columns in the original dataset had missing values. The missing values were handled as follows:
-    * Numerical Columns: Rows with numerical values missing for critical columns (e.g., `year`, `price`, `odometer`) were removed.
-    * Categorical Columns: For categorical columns such as condition, manufacturer, and model, missing values were imputed by using the most frequent value (mode), or rows with missing values were dropped when imputation was not suitable.
+1. Handling Missing Values
+    * Rows with missing values in critical columns (e.g., `year`, `price`, `odometer`) were removed.
+    * Categorical Columns: For categorical columns, missing values were filled with `unknown`.
     * After preprocessing, no missing values remained in the dataset.
-
 2. Removing Irrelevant Columns
-Certain columns that were not relevant to the analysis, such as id, VIN, and state, were removed from the dataset to reduce noise and ensure more accurate modeling.
+    * Columns such as `id`, `VIN`, and `region` were dripped from the dataset, the first two because they were irrelevant to the research and the latter because it overlapped with State.
 3. Converting Data Types
-Several columns had incorrect data types. For example:
-The year and age columns were converted to integers, with age being derived as the difference between the current year and the car’s manufacture year.
-The price, odometer, and age columns were set as numerical types (int64, float64).
-Categorical features such as condition, fuel, manufacturer, and model were kept as object (string) types.
-4. Feature Engineering:
-    * Age of the car: A new feature, age, was created by subtracting the year column from the current year, providing valuable information for modeling.
-    * Categorical Encoding: Several categorical columns such as manufacturer, condition, fuel, and transmission were transformed using one-hot encoding to convert them into numerical representations suitable for modeling.
-5. Removing Outliers: Outliers in the price and odometer columns were identified and removed. Cars with an odometer reading of 0 miles and extreme prices were considered outliers and removed to avoid skewing the analysis.
-6. Dropping Duplicates: Duplicate entries were identified and removed to ensure the integrity of the dataset. This was especially important for categorical features like model and manufacturer, where duplicates could impact model training.
-After these preprocessing steps, the dataset was reduced from 426,880 to 381,712 rows with 16 columns. The cleaned data was ready for further analysis and model building.
-
-## 🗃️ Project Organization
-
-* `notebook/used_cars.ipynb` The Jupyter notebook containing the data cleaning, analysis, and modeling steps.
-* `data/vehicles.csv` The raw dataset used for the analysis.
-* `images/` Folder containing the relevant plots and visualizations used in the analysis.
+    * The year column was converted to integer type.
+4. Handling Categorical Variables
+    * For columns like `manufacturer`, `model`, `size`, `type`, and `paint_color`, categories with less than 1% frequency were grouped into an `other` category to reduce dimensionality.
+5. Removing outliers
+    * Extreme outliers in the `price` column were removed by keeping only valies between the 1st and 99th percentiles.
+6. Feature Engineering:
+    * A new feature, `age`, was created by subtracting the `year` column from the current year (`2024`).
+7. Preprocessing for Modeling
+    * Numeric features (`age`, `odometer`) were standardized using `StandardScaler`.
+    * Categorical features were one-hot encoded using `OneHotEncoder`
+8. Data Splitting
+    * The data was split into training and testing sets (80% train, 20% test) for model training and evaluation.
 
 ## 🔍 Key Findings
 
 ### Model Performance
 
-Three regression models were tested:
-
-* Linear Regression
-  * R² Score: 0.45682
-  * RMSE: $9,898.68
-* Ridge Regression
-  * R² Score: 0.45682
-  * RMSE: $9,898.69
-* Lasso Regression
-  * R² Score: 0.45666
-  * RMSE: $9,900.17
-
-The models showed similar performance, so I decided to dive deeper on Ridge using `GridSearchCV` to find the best features and hyperparameter `alpha`.
+1. Model Performance: Three regression models were tested:
+    * Linear Regression
+        * R² Score: 0.45682
+        * RMSE: $9,898.68
+    * Ridge Regression
+        * R² Score: 0.45682
+        * RMSE: $9,898.69
+    * Lasso Regression
+        * R² Score: 0.45666
+        * RMSE: $9,900.17
+    * All three models showed similar performance, `Ridge Regression` was chosen for further optimization using `GridSearchCV`.
+2. Optimal model parameters
+    * To find the best features and hyperparameter `alpha`. leading to the following optimal parameter: **Best Alpha (Ridge)**: `0.1`
 
 ## 💸 Recommendations to Dealership
 
@@ -80,23 +81,6 @@ The top features positively impacting used car pricing include vehicle condition
 ![Top 10 Positive Impacting Features](images/top10pos.png)
 ![Top 10 Negative Impacting Features](images/top10neg.png)
 
-Price Distribution: Distribution of car prices, highlighting the skew towards lower-priced vehicles.
-
-Placeholder for plot: {{plot_price_distribution}}
-Correlations with Price: A heatmap showing the correlation between numeric features and price.
-
-Placeholder for plot: {{plot_price_correlations}}
-Top Positive and Negative Features: Bar plots showing the features that most positively and negatively affect car prices.
-
-Placeholder for plot: {{plot_top_positive_features}}
-Placeholder for plot: {{plot_top_negative_features}}
-Model Tuning
-Grid search was performed to tune hyperparameters, particularly the regularization strength (alpha) for Ridge regression, leading to the following optimal parameter:
-
-Best Alpha (Ridge): 0.1
-Data After Cleanup
-After cleaning the data (removing missing values and irrelevant columns), the dataset was reduced to 381,712 rows and 16 columns. The following are some key stats after cleaning:
-
 ## 🔮 Next Steps & Recommendations
 
 For the used car dealership, the following actions are recommended:
@@ -104,3 +88,8 @@ For the used car dealership, the following actions are recommended:
 * Prioritize Vehicles with Positive Features: Cars that are in good or excellent condition, have automatic transmission, and are pickups or trucks are likely to fetch higher prices.
 * Assess the Market for Negative Features: Cars with salvage titles, non-gasoline fuel types (e.g., electric, hybrid), or front-wheel drive (fwd) may need to be priced more competitively or avoided for premium sales.
 * Continual Model Improvement: Further feature engineering (e.g., adding more information about the car’s maintenance history) and testing different models could improve prediction accuracy.
+
+For further research, the following actions are recommended:
+
+* Apply `GridSearchCV` to other regression models and fine tune hyperparameters.
+* Explore using the complete dataset (millions) of records, and see how that changes the data skewness and results. 
